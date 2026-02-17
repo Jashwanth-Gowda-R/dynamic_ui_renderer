@@ -1,7 +1,9 @@
 name: dynamic_ui_renderer
-description: "A new Flutter package project."
+description: "A Flutter package for rendering UI from JSON responses. Build dynamic forms, screens, and components from server-driven JSON."
 version: 0.0.1
-homepage:
+homepage: https://github.com/Jashwanth-Gowda-R/dynamic_ui_renderer
+repository: https://github.com/Jashwanth-Gowda-R/dynamic_ui_renderer
+issue_tracker: https://github.com/Jashwanth-Gowda-R/dynamic_ui_renderer
 
 environment:
   sdk: ^3.10.0
@@ -15,6 +17,18 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+
+# This makes your package discoverable on pub.dev
+topics:
+  - server-driven-ui
+  - dynamic-ui
+  - forms
+  - json-ui
+
+# # Optional: Add screenshots for pub.dev
+# screenshots:
+#   - description: "Example form rendered from JSON"
+#     path: screenshots/form_example.png
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
