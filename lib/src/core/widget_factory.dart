@@ -52,9 +52,14 @@ class WidgetFactory {
   /// Creates a Button widget from JSON
   static Widget _buildButton(UIComponent component) {
     return ElevatedButton(
+      style: ButtonStyle(
+        backgroundColor: WidgetStateProperty.all<Color>(
+          UIUtils.parseColor(component.properties['color']) ?? Colors.white,
+        ),
+      ),
       onPressed: () {
         // TODO : Will implement actions later
-        debugPrint('Button pressed: ${component.actions}');
+        // debugPrint('Button pressed: ${component.actions}');
       },
       child: component.children.isNotEmpty
           ? build(component.children.first)
