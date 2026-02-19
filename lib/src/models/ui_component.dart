@@ -1,10 +1,10 @@
 /// Represents a UI component parsed from JSON
 /// This is the core data structure that represents any UI element
 class UIComponent {
-  final String type;           // e.g., 'text', 'button', 'container'
+  final String type; // e.g., 'text', 'button', 'container'
   final Map<String, dynamic> properties; // Styling, text, etc.
-  final List<UIComponent> children;      // Nested components
-  final Map<String, dynamic> actions;    // What happens on interaction
+  final List<UIComponent> children; // Nested components
+  final Map<String, dynamic> actions; // What happens on interaction
 
   UIComponent({
     required this.type,
@@ -19,9 +19,11 @@ class UIComponent {
     return UIComponent(
       type: json['type'] as String,
       properties: json['properties'] as Map<String, dynamic>? ?? {},
-      children: (json['children'] as List?)
-          ?.map((c) => UIComponent.fromJson(c as Map<String, dynamic>))
-          .toList() ?? [],
+      children:
+          (json['children'] as List?)
+              ?.map((c) => UIComponent.fromJson(c as Map<String, dynamic>))
+              .toList() ??
+          [],
       actions: json['actions'] as Map<String, dynamic>? ?? {},
     );
   }
