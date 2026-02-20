@@ -47,7 +47,14 @@ void main() {
       };
 
       await tester.pumpWidget(
-        MaterialApp(home: Scaffold(body: DynamicUIRenderer.fromJsonMap(json))),
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => 
+                DynamicUIRenderer.fromJsonMap(json, context),
+            ),
+          ),
+        ),
       );
 
       expect(find.text('Test Text'), findsOneWidget);
@@ -66,7 +73,14 @@ void main() {
       };
 
       await tester.pumpWidget(
-        MaterialApp(home: Scaffold(body: DynamicUIRenderer.fromJsonMap(json))),
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => 
+                DynamicUIRenderer.fromJsonMap(json, context),
+            ),
+          ),
+        ),
       );
 
       expect(find.text('Click Me'), findsOneWidget);
@@ -89,7 +103,14 @@ void main() {
       };
 
       await tester.pumpWidget(
-        MaterialApp(home: Scaffold(body: DynamicUIRenderer.fromJsonMap(json))),
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => 
+                DynamicUIRenderer.fromJsonMap(json, context),
+            ),
+          ),
+        ),
       );
 
       expect(find.text('First'), findsOneWidget);
@@ -101,7 +122,12 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(body: DynamicUIRenderer.fromJsonMap(invalidJson)),
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => 
+                DynamicUIRenderer.fromJsonMap(invalidJson, context),
+            ),
+          ),
         ),
       );
 
@@ -111,8 +137,6 @@ void main() {
   });
 
   group('Utility Function Tests', () {
-    // Import utils directly for testing
-
     test('parseEdgeInsets handles numbers correctly', () {
       final result = utils.UIUtils.parseEdgeInsets(16);
       expect(result, const EdgeInsets.all(16));

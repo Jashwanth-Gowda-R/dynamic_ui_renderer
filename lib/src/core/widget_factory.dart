@@ -1,3 +1,4 @@
+import 'package:dynamic_ui_renderer/src/actions/action_handler.dart';
 import 'package:dynamic_ui_renderer/src/models/ui_component.dart';
 import 'package:flutter/material.dart';
 
@@ -49,21 +50,65 @@ class WidgetFactory {
     );
   }
 
-  /// Creates a Button widget from JSON
+  // /// Creates a Button widget from JSON
+  // static Widget _buildButton(UIComponent component) {
+  //   return ElevatedButton(
+  //     style: ButtonStyle(
+  //       backgroundColor: WidgetStateProperty.all<Color>(
+  //         UIUtils.parseColor(component.properties['color']) ?? Colors.white,
+  //       ),
+  //     ),
+  //     onPressed: () {
+  //       // Handle button actions
+  //       // debugPrint('Button pressed: ${component.actions}');
+  //     },
+  //     child: component.children.isNotEmpty
+  //         ? build(component.children.first)
+  //         : Text(component.properties['text'] ?? 'Button'),
+  //   );
+  // }
+
+  /// Creates a Button widget from JSON - UPDATED with actions
   static Widget _buildButton(UIComponent component) {
     return ElevatedButton(
-      style: ButtonStyle(
-        backgroundColor: WidgetStateProperty.all<Color>(
-          UIUtils.parseColor(component.properties['color']) ?? Colors.white,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: UIUtils.parseColor(
+          component.properties['backgroundColor'],
+        ),
+        foregroundColor: UIUtils.parseColor(
+          component.properties['foregroundColor'],
+        ),
+        elevation: component.properties['elevation']?.toDouble(),
+        padding: UIUtils.parseEdgeInsets(component.properties['padding']),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(
+            component.properties['borderRadius']?.toDouble() ?? 4,
+          ),
         ),
       ),
       onPressed: () {
-        // TODO : Will implement actions later
-        // debugPrint('Button pressed: ${component.actions}');
+        // Handle button actions
+        if (component.actions.isNotEmpty) {
+          // debugPrint('Button pressed - executing action: ${component.actions}');
+          ActionHandler.handleAction(
+            component.buildContext!,
+            component.actions,
+          );
+        } else {
+          // debugPrint('Button pressed (no actions defined)');
+        }
       },
       child: component.children.isNotEmpty
           ? build(component.children.first)
-          : Text(component.properties['text'] ?? 'Button'),
+          : Text(
+              component.properties['text'] ?? 'Button',
+              style: TextStyle(
+                fontSize: component.properties['fontSize']?.toDouble(),
+                fontWeight: UIUtils.parseFontWeight(
+                  component.properties['fontWeight'],
+                ),
+              ),
+            ),
     );
   }
 
@@ -135,4 +180,15 @@ class WidgetFactory {
         return CrossAxisAlignment.start;
     }
   }
+}
+
+// Extension to get BuildContext - needed for navigation
+extension UIComponentExtension on UIComponent {
+  static BuildContext? _context;
+
+  void setContext(BuildContext context) {
+    _context = context;
+  }
+
+  BuildContext? get buildContext => _context;
 }

@@ -2,6 +2,8 @@
 
 // Export key classes for users who need direct access
 export 'src/models/ui_component.dart';
+export 'src/actions/action_models.dart';
+export 'src/actions/action_handler.dart';
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -23,12 +25,16 @@ class DynamicUIRenderer {
   ///   }
   /// ''');
   /// ```
-  static Widget fromJsonString(String jsonString) {
+  static Widget fromJsonString(String jsonString, BuildContext context) {
     try {
       final Map<String, dynamic> json = Map<String, dynamic>.from(
         jsonDecode(jsonString) as Map,
       );
       final component = UIComponent.fromJson(json);
+
+      // Store context for actions that need navigation
+      component.setContext(context);
+
       return WidgetFactory.build(component);
     } catch (e) {
       return _buildErrorWidget('Error parsing JSON: $e');
@@ -44,9 +50,13 @@ class DynamicUIRenderer {
   ///   "properties": {"text": "Hello World"}
   /// });
   /// ```
-  static Widget fromJsonMap(Map<String, dynamic> json) {
+  static Widget fromJsonMap(Map<String, dynamic> json, BuildContext context) {
     try {
       final component = UIComponent.fromJson(json);
+
+      // Store context for actions that need navigation
+      component.setContext(context);
+
       return WidgetFactory.build(component);
     } catch (e) {
       return _buildErrorWidget('Error building UI: $e');
