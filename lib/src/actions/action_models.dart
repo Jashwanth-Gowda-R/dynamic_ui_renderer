@@ -2,22 +2,22 @@
 enum ActionType {
   /// Navigate to a new screen
   navigate,
-  
+
   /// Show a dialog
   showDialog,
-  
+
   /// Show a bottom sheet
   showBottomSheet,
-  
+
   /// Show a snackbar
   showSnackbar,
-  
+
   /// Print to console (for debugging)
   print,
-  
+
   /// Open a URL in browser
   launchUrl,
-  
+
   /// Call a custom function
   custom,
 }
@@ -44,7 +44,7 @@ class ButtonAction {
 
   static ActionType _parseActionType(String? type) {
     if (type == null) return ActionType.print;
-    
+
     switch (type.toLowerCase()) {
       case 'navigate':
         return ActionType.navigate;

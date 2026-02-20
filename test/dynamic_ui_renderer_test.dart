@@ -50,8 +50,8 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Builder(
-              builder: (context) => 
-                DynamicUIRenderer.fromJsonMap(json, context),
+              builder: (context) =>
+                  DynamicUIRenderer.fromJsonMap(json, context),
             ),
           ),
         ),
@@ -76,8 +76,8 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Builder(
-              builder: (context) => 
-                DynamicUIRenderer.fromJsonMap(json, context),
+              builder: (context) =>
+                  DynamicUIRenderer.fromJsonMap(json, context),
             ),
           ),
         ),
@@ -106,8 +106,8 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Builder(
-              builder: (context) => 
-                DynamicUIRenderer.fromJsonMap(json, context),
+              builder: (context) =>
+                  DynamicUIRenderer.fromJsonMap(json, context),
             ),
           ),
         ),
@@ -124,8 +124,8 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Builder(
-              builder: (context) => 
-                DynamicUIRenderer.fromJsonMap(invalidJson, context),
+              builder: (context) =>
+                  DynamicUIRenderer.fromJsonMap(invalidJson, context),
             ),
           ),
         ),

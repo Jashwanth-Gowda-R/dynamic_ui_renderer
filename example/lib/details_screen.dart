@@ -21,19 +21,12 @@ class DetailsScreen extends StatelessWidget {
                 color: Colors.purple.shade50,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.info,
-                color: Colors.purple,
-                size: 80,
-              ),
+              child: const Icon(Icons.info, color: Colors.purple, size: 80),
             ),
             const SizedBox(height: 24),
             const Text(
               'Details Page',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             const Text(
