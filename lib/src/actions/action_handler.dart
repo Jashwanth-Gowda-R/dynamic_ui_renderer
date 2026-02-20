@@ -15,39 +15,39 @@ class ActionHandler {
 
     try {
       final action = ButtonAction.fromJson(actionData);
-      
+
       switch (action.type) {
         case ActionType.navigate:
           _handleNavigate(context, action.parameters);
           break;
-          
+
         case ActionType.showDialog:
           _handleShowDialog(context, action.parameters);
           break;
-          
+
         case ActionType.showBottomSheet:
           _handleShowBottomSheet(context, action.parameters);
           break;
-          
+
         case ActionType.showSnackbar:
           _handleShowSnackbar(context, action.parameters);
           break;
-          
+
         case ActionType.launchUrl:
           _handleLaunchUrl(context, action.parameters);
           break;
-          
+
         case ActionType.print:
           _handlePrint(action.parameters);
           break;
-          
+
         case ActionType.custom:
           _handleCustom(action.parameters);
           break;
       }
     } catch (e) {
       debugPrint('Error handling action: $e');
-      
+
       // Show error in debug mode
       if (actionData['showError'] == true) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -60,11 +60,14 @@ class ActionHandler {
     }
   }
 
-  static void _handleNavigate(BuildContext context, Map<String, dynamic> params) {
+  static void _handleNavigate(
+    BuildContext context,
+    Map<String, dynamic> params,
+  ) {
     final route = params['route'] as String?;
     final type = params['type'] as String? ?? 'push';
     final arguments = params['arguments'];
-    
+
     if (route == null) {
       debugPrint('Navigation failed: No route provided');
       return;
@@ -74,31 +77,34 @@ class ActionHandler {
       case 'push':
         Navigator.of(context).pushNamed(route, arguments: arguments);
         break;
-        
+
       case 'pushReplacement':
         Navigator.of(context).pushReplacementNamed(route, arguments: arguments);
         break;
-        
+
       case 'pushAndRemoveUntil':
         Navigator.of(context).pushNamedAndRemoveUntil(
-          route, 
+          route,
           (route) => false,
           arguments: arguments,
         );
         break;
-        
+
       case 'pop':
         Navigator.of(context).pop(arguments);
         break;
-        
+
       default:
         Navigator.of(context).pushNamed(route, arguments: arguments);
     }
-    
+
     debugPrint('Navigated to: $route');
   }
 
-  static void _handleShowDialog(BuildContext context, Map<String, dynamic> params) {
+  static void _handleShowDialog(
+    BuildContext context,
+    Map<String, dynamic> params,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -114,7 +120,10 @@ class ActionHandler {
     );
   }
 
-  static void _handleShowBottomSheet(BuildContext context, Map<String, dynamic> params) {
+  static void _handleShowBottomSheet(
+    BuildContext context,
+    Map<String, dynamic> params,
+  ) {
     showModalBottomSheet(
       context: context,
       builder: (context) => Container(
@@ -139,7 +148,10 @@ class ActionHandler {
     );
   }
 
-  static void _handleShowSnackbar(BuildContext context, Map<String, dynamic> params) {
+  static void _handleShowSnackbar(
+    BuildContext context,
+    Map<String, dynamic> params,
+  ) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(params['message'] ?? ''),
@@ -150,7 +162,10 @@ class ActionHandler {
                 onPressed: () {
                   // Handle snackbar action
                   if (params['actionData'] != null) {
-                    handleAction(context, params['actionData'] as Map<String, dynamic>);
+                    handleAction(
+                      context,
+                      params['actionData'] as Map<String, dynamic>,
+                    );
                   }
                 },
               )
@@ -159,17 +174,20 @@ class ActionHandler {
     );
   }
 
-  static Future<void> _handleLaunchUrl(BuildContext context, Map<String, dynamic> params) async {
+  static Future<void> _handleLaunchUrl(
+    BuildContext context,
+    Map<String, dynamic> params,
+  ) async {
     final url = params['url'] as String?;
     final mode = params['mode'] as String? ?? 'inApp';
-    
+
     if (url == null) {
       debugPrint('URL launch failed: No URL provided');
       return;
     }
 
     final uri = Uri.parse(url);
-    
+
     try {
       if (mode == 'inApp') {
         // For in-app browser, you might want to use a package like webview_flutter
@@ -185,7 +203,7 @@ class ActionHandler {
       debugPrint('Launched URL: $url');
     } catch (e) {
       debugPrint('Failed to launch URL: $e');
-      
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Could not launch URL: $url'),
@@ -198,7 +216,7 @@ class ActionHandler {
   static void _handlePrint(Map<String, dynamic> params) {
     final message = params['message'] ?? 'Button pressed';
     final level = params['level'] ?? 'info';
-    
+
     switch (level) {
       case 'info':
         debugPrint('ℹ️ $message');
