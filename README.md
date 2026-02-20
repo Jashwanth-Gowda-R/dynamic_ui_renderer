@@ -14,7 +14,7 @@ A powerful Flutter package for rendering UI dynamically from JSON responses. Bui
 
 ---
 
-## ✨ Features (v0.1.2)
+## ✨ Features (v0.1.0)
 
 ### 🎯 **Complete Action System**
 - ✅ **Print** - Debug logging with levels (info/warning/error)
