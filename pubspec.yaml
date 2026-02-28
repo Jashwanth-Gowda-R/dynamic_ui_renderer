@@ -1,6 +1,6 @@
 name: dynamic_ui_renderer
 description: "A Flutter package for rendering UI from JSON responses. Build dynamic forms, screens, and components from server-driven JSON."
-version: 0.1.0
+version: 0.2.0
 homepage: https://github.com/Jashwanth-Gowda-R/dynamic_ui_renderer
 repository: https://github.com/Jashwanth-Gowda-R/dynamic_ui_renderer
 issue_tracker: https://github.com/Jashwanth-Gowda-R/dynamic_ui_renderer
