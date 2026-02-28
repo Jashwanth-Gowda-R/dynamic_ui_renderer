@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.1] - 2024-02-28 📚
+
+### 📝 Documentation
+- Updated README with improved formatting and examples
+- Fixed typos and clarified installation instructions
+- Enhanced documentation for better developer experience
+
+### ✅ Maintenance
+- No code changes - documentation only update
+
 ## [0.2.0] - 2024-02-28 📝
 
 ### ✨ Major New Features - Forms & Validation System
