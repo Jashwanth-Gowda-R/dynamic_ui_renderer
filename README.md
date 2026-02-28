@@ -1,5 +1,5 @@
 
-```markdown
+
 # dynamic_ui_renderer
 
 [![pub package](https://img.shields.io/pub/v/dynamic_ui_renderer.svg)](https://pub.dev/packages/dynamic_ui_renderer)
@@ -576,15 +576,17 @@ This project is licensed under the MIT License - see the [LICENSE](https://pub.d
 
 ---
 
-<div align="center">
-
-**Made with ❤️ by [Jashwanth Gowda R](https://github.com/Jashwanth-Gowda-R)**
-
 If you find this package useful, please consider:
 - ⭐ **Starring** the [GitHub repository](https://github.com/Jashwanth-Gowda-R/dynamic_ui_renderer)
 - 📢 **Sharing** it with others
 - 🐛 **Reporting** issues
 -  💡 **Suggesting** features
+
+<div align="center">
+
+**Made with ❤️ by [Jashwanth Gowda R](https://github.com/Jashwanth-Gowda-R)**
+
+
 
 </div>
 
