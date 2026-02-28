@@ -584,7 +584,7 @@ If you find this package useful, please consider:
 
 <div align="center">
 
-**Made with ❤️ by [Jashwanth Gowda R](https://github.com/Jashwanth-Gowda-R)**
+**Made for Flutter Community with ❤️ by [Jashwanth Gowda R](https://github.com/Jashwanth-Gowda-R)**
 
 
 
