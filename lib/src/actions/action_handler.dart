@@ -204,13 +204,17 @@ class ActionHandler {
         } else {
           await launchUrl(uri);
         }
-        debugPrint('Launched URL: $url');
+        // debugPrint('Launched URL: $url');
       } else {
-        _showUrlLaunchError(context, url);
+        if (context.mounted) {
+          _showUrlLaunchError(context, url);
+        }
       }
     } catch (e) {
-      debugPrint('Failed to launch URL: $e');
-      _showUrlLaunchError(context, url);
+      // debugPrint('Failed to launch URL: $e');
+      if (context.mounted) {
+        _showUrlLaunchError(context, url);
+      }
     }
   }
 

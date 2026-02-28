@@ -92,7 +92,7 @@ class _DynamicFormState extends State<DynamicForm> {
                 BoxShadow(
                   blurRadius: widget.component.properties['elevation']!
                       .toDouble(),
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                 ),
               ]
             : null,

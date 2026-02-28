@@ -127,16 +127,10 @@ class DynamicUIRenderer {
   }
 
   static final Map<String, FormSubmitCallback> _formCallbacks = {};
-  static String? _defaultFormId;
 
   /// Register a callback for a specific form ID
   static void registerFormCallback(String formId, FormSubmitCallback callback) {
     _formCallbacks[formId] = callback;
-  }
-
-  /// Set default form ID for forms without explicit ID
-  static void setDefaultFormId(String formId) {
-    _defaultFormId = formId;
   }
 
   /// Get callback for a form ID
