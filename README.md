@@ -1,5 +1,5 @@
 
-
+```markdown
 # dynamic_ui_renderer
 
 [![pub package](https://img.shields.io/pub/v/dynamic_ui_renderer.svg)](https://pub.dev/packages/dynamic_ui_renderer)
@@ -14,7 +14,32 @@ A powerful Flutter package for rendering UI dynamically from JSON responses. Bui
 
 ---
 
-## ✨ Features (v0.1.0)
+## ✨ Features (v0.2.0)
+
+### 📝 **Complete Forms & Validation System**
+- ✅ **Dynamic Form Widget** - Full-featured form container with validation
+- ✅ **10+ Field Types** - Text, Email, Password, Number, Phone, Dropdown, Checkbox, Date, Textarea, Radio
+- ✅ **Real-time Validation** - Validate as users type with instant feedback
+- ✅ **Multi-Form Support** - Handle multiple independent forms with unique IDs
+- ✅ **Form Callbacks** - Global and per-form submission callbacks with form data
+- ✅ **Conditional Visibility** - Show/hide fields based on other field values
+- ✅ **Form Reset** - Complete form reset for all field types
+
+### ✅ **12+ Validation Rules**
+| Rule | Description | Example |
+|------|-------------|---------|
+| `required` | Field must have a value | `{"type": "required"}` |
+| `email` | Valid email format | `{"type": "email"}` |
+| `minLength` | Minimum character length | `{"type": "minLength", "value": 8}` |
+| `maxLength` | Maximum character length | `{"type": "maxLength", "value": 50}` |
+| `minValue` | Minimum numeric value | `{"type": "minValue", "value": 18}` |
+| `maxValue` | Maximum numeric value | `{"type": "maxValue", "value": 120}` |
+| `pattern` | Regex pattern matching | `{"type": "pattern", "pattern": "^[A-Z]+$"}` |
+| `match` | Match another field's value | `{"type": "match", "value": "password"}` |
+| `phone` | Valid phone number format | `{"type": "phone"}` |
+| `url` | Valid URL format | `{"type": "url"}` |
+| `date` | Valid date format | `{"type": "date"}` |
+| `custom` | Custom validation logic | `{"type": "custom", "customConfig": {...}}` |
 
 ### 🎯 **Complete Action System**
 - ✅ **Print** - Debug logging with levels (info/warning/error)
@@ -36,8 +61,8 @@ A powerful Flutter package for rendering UI dynamically from JSON responses. Bui
 - ✅ **Error handling** - Graceful fallbacks with user-friendly messages
 - ✅ **Context propagation** - Automatic for navigation and dialogs
 - ✅ **Extensible architecture** - Easy to add custom widgets
-- ✅ **Well tested** - 90%+ code coverage
-- ✅ **Lightweight** - Minimal dependencies
+- ✅ **Well tested** - 95%+ code coverage
+- ✅ **Lightweight** - Minimal dependencies (`url_launcher` only)
 
 ---
 
@@ -47,7 +72,7 @@ Add the dependency to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  dynamic_ui_renderer: ^0.1.0
+  dynamic_ui_renderer: ^0.2.0
 ```
 
 Then run:
@@ -67,6 +92,11 @@ import 'package:flutter/material.dart';
 import 'package:dynamic_ui_renderer/dynamic_ui_renderer.dart';
 
 void main() {
+  // Register form callbacks (optional)
+  DynamicUIRenderer.registerFormCallback('login_form', (formId, formData) {
+    print('Login form submitted: $formData');
+  });
+  
   runApp(const MyApp());
 }
 
@@ -82,60 +112,55 @@ class MyApp extends StatelessWidget {
         {
           "type": "column",
           "properties": {
-            "mainAxisAlignment": "center",
-            "crossAxisAlignment": "center",
+            "crossAxisAlignment": "stretch",
             "padding": 16
           },
           "children": [
             {
               "type": "text",
               "properties": {
-                "text": "Hello from JSON! 👋",
+                "text": "Login Form",
                 "fontSize": 24,
                 "fontWeight": "bold",
-                "color": "#2196F3",
-                "textAlign": "center"
+                "color": "#2196F3"
               }
             },
             {
-              "type": "container",
+              "type": "form",
               "properties": {
-                "margin": [0, 20, 0, 0],
-                "padding": 16,
-                "color": "#E3F2FD",
-                "borderRadius": 8
+                "formId": "login_form",
+                "submitText": "Login",
+                "submitButtonColor": "#4CAF50"
               },
-              "children": [
+              "fields": [
                 {
-                  "type": "text",
-                  "properties": {
-                    "text": "This entire UI is rendered from JSON!",
-                    "color": "#1565C0"
-                  }
+                  "name": "email",
+                  "type": "email",
+                  "label": "Email",
+                  "required": true,
+                  "validations": [
+                    {"type": "email", "message": "Invalid email"}
+                  ]
+                },
+                {
+                  "name": "password",
+                  "type": "password",
+                  "label": "Password",
+                  "required": true,
+                  "validations": [
+                    {"type": "minLength", "value": 6}
+                  ]
+                },
+                {
+                  "name": "rememberMe",
+                  "type": "checkbox",
+                  "label": "Remember me"
                 }
               ]
-            },
-            {
-              "type": "button",
-              "properties": {
-                "text": "Click Me",
-                "backgroundColor": "#4CAF50",
-                "foregroundColor": "#FFFFFF",
-                "borderRadius": 8,
-                "margin": [0, 20, 0, 0]
-              },
-              "actions": {
-                "type": "showDialog",
-                "parameters": {
-                  "title": "Welcome! 🎉",
-                  "message": "Button clicked successfully!",
-                  "buttonText": "OK"
-                }
-              }
             }
           ]
         }
-        ''', context),
+        ''', context, formId: 'login_form'),
       ),
     );
   }
@@ -146,83 +171,199 @@ class MyApp extends StatelessWidget {
 
 ## 📖 Documentation
 
-### 📝 JSON Schema Reference
+### 📝 Form JSON Schema
 
----
-
-#### 🧾 Text Widget
+#### Form Widget
 
 ```json
 {
+  "type": "form",
+  "properties": {
+    "formId": "unique_form_id",           // Optional: for multi-form support
+    "title": "Form Title",                 // Optional
+    "titleFontSize": 18,                   // Optional
+    "titleColor": "#1976D2",               // Optional
+    "backgroundColor": "#FFFFFF",          // Optional
+    "padding": 20,                         // Optional
+    "borderRadius": 12,                    // Optional
+    "elevation": 4,                        // Optional
+    "submitText": "Submit",                 // Optional: default "Submit"
+    "submitButtonColor": "#4CAF50",         // Optional
+    "submitButtonTextColor": "#FFFFFF",     // Optional
+    "submitButtonRadius": 8,                // Optional
+    "submitButtonHeight": 48,               // Optional
+    "showValidationMessage": true,          // Optional: show error snackbar
+    "validationMessage": "Please fix errors" // Optional: custom error message
+  },
+  "fields": [] // Array of field configurations
+}
+```
+
+### 📝 Field Types Reference
+
+#### Text Field
+```json
+{
+  "name": "username",
   "type": "text",
-  "properties": {
-    "text": "Your text here",        // Required
-    "fontSize": 16,                   // Optional
-    "fontWeight": "bold",              // Optional: bold, normal, w100-w900
-    "color": "#FF0000",                // Optional: hex color (#RGB or #RRGGBB)
-    "textAlign": "center"              // Optional: left, center, right
-  }
-}
-```
-
----
-
-#### 📦 Container Widget
-
-```json
-{
-  "type": "container",
-  "properties": {
-    "padding": 16,                     // Optional: number or [L,T,R,B]
-    "margin": [8, 16, 8, 16],          // Optional: number or [L,T,R,B]
-    "color": "#F5F5F5",                 // Optional: hex color
-    "width": 200,                       // Optional: number
-    "height": 100,                       // Optional: number
-    "borderRadius": 8                    // Optional: number
-  },
-  "children": []                         // Optional: child components
-}
-```
-
-**Padding/Margin Examples:**
-- Single value: `"padding": 16` → applies to all sides
-- List: `"padding": [8, 16, 8, 16]` → [left, top, right, bottom]
-
----
-
-#### 🔘 Button Widget with Actions
-
-```json
-{
-  "type": "button",
-  "properties": {
-    "text": "Click Me",                  // Optional (use if no children)
-    "backgroundColor": "#4CAF50",        // Optional: hex color
-    "foregroundColor": "#FFFFFF",        // Optional: text/icon color
-    "borderRadius": 8,                   // Optional: number
-    "elevation": 4,                       // Optional: number
-    "padding": [8, 16, 8, 16]             // Optional: number or list
-  },
-  "children": [                           // Optional: custom button content
-    {
-      "type": "text",
-      "properties": {
-        "text": "Click Me",
-        "color": "#FFFFFF"
-      }
-    }
+  "label": "Username",
+  "hint": "Enter your username",
+  "placeholder": "johndoe",
+  "required": true,
+  "requiredMessage": "Username is required",
+  "order": 1,
+  "validations": [
+    {"type": "minLength", "value": 3, "message": "Minimum 3 characters"},
+    {"type": "maxLength", "value": 20, "message": "Maximum 20 characters"}
   ],
-  "actions": {                            // Required for interactivity
-    "type": "navigate",                    // Action type
-    "parameters": {                         // Action-specific parameters
-      "route": "/details",
-      "type": "push",
-      "arguments": {
-        "id": 123,
-        "name": "Product"
-      }
-    }
+  "uiProperties": {
+    "borderRadius": 8,
+    "filled": true,
+    "fillColor": "#F5F5F5",
+    "fontSize": 16,
+    "prefixIcon": "person",
+    "prefixIconColor": "#757575"
   }
+}
+```
+
+#### Email Field
+```json
+{
+  "name": "email",
+  "type": "email",
+  "label": "Email Address",
+  "hint": "Enter your email",
+  "required": true,
+  "validations": [
+    {"type": "email", "message": "Invalid email format"}
+  ],
+  "uiProperties": {
+    "prefixIcon": "email"
+  }
+}
+```
+
+#### Password Field
+```json
+{
+  "name": "password",
+  "type": "password",
+  "label": "Password",
+  "hint": "Create a strong password",
+  "required": true,
+  "validations": [
+    {"type": "minLength", "value": 8, "message": "Minimum 8 characters"},
+    {"type": "pattern", "pattern": "^(?=.*[A-Za-z])(?=.*\\d).{8,}$", 
+     "message": "Must contain letter and number"}
+  ],
+  "uiProperties": {
+    "prefixIcon": "lock"
+  }
+}
+```
+
+#### Number Field
+```json
+{
+  "name": "age",
+  "type": "number",
+  "label": "Age",
+  "hint": "Enter your age",
+  "validations": [
+    {"type": "minValue", "value": 18, "message": "Must be 18 or older"},
+    {"type": "maxValue", "value": 120, "message": "Invalid age"}
+  ]
+}
+```
+
+#### Phone Field
+```json
+{
+  "name": "phone",
+  "type": "phone",
+  "label": "Phone Number",
+  "hint": "Enter your phone number",
+  "validations": [
+    {"type": "phone", "message": "Invalid phone number"}
+  ],
+  "uiProperties": {
+    "prefixIcon": "phone"
+  }
+}
+```
+
+#### Dropdown Field
+```json
+{
+  "name": "country",
+  "type": "dropdown",
+  "label": "Country",
+  "hint": "Select your country",
+  "required": true,
+  "options": [
+    {"label": "United States", "value": "us", "icon": {"name": "home"}},
+    {"label": "India", "value": "in", "icon": {"name": "home"}},
+    {"label": "United Kingdom", "value": "uk", "disabled": true}
+  ]
+}
+```
+
+#### Checkbox Field
+```json
+{
+  "name": "termsAccepted",
+  "type": "checkbox",
+  "label": "I accept the Terms and Conditions",
+  "required": true,
+  "requiredMessage": "You must accept the terms",
+  "uiProperties": {
+    "activeColor": "#4CAF50",
+    "checkColor": "#FFFFFF"
+  }
+}
+```
+
+#### Date Field
+```json
+{
+  "name": "birthDate",
+  "type": "date",
+  "label": "Birth Date",
+  "hint": "Select your birth date",
+  "uiProperties": {
+    "format": "dd/MM/yyyy",
+    "iconColor": "#1976D2"
+  }
+}
+```
+
+#### Textarea Field
+```json
+{
+  "name": "message",
+  "type": "textarea",
+  "label": "Message",
+  "hint": "Type your message",
+  "required": true,
+  "uiProperties": {
+    "minLines": 3,
+    "maxLines": 5
+  }
+}
+```
+
+#### Radio Field
+```json
+{
+  "name": "priority",
+  "type": "radio",
+  "label": "Priority",
+  "options": [
+    {"label": "Low", "value": "low"},
+    {"label": "Medium", "value": "medium"},
+    {"label": "High", "value": "high"}
+  ]
 }
 ```
 
@@ -230,211 +371,71 @@ class MyApp extends StatelessWidget {
 
 | Type | Description | Required Parameters | Example |
 |------|-------------|---------------------|---------|
-| `print` | Print to console | `message`, `level` (info/warning/error) | `{"message": "Hello", "level": "info"}` |
+| `print` | Print to console | `message`, `level` | `{"message": "Hello", "level": "info"}` |
 | `showDialog` | Show alert dialog | `title`, `message`, `buttonText` | `{"title": "Alert", "message": "Hello"}` |
 | `showSnackbar` | Show snackbar | `message`, `duration`, `actionLabel` | `{"message": "Saved!", "duration": 3}` |
-| `launchUrl` | Open URL in browser | `url`, `mode` (inApp/external) | `{"url": "https://flutter.dev"}` |
-| `showBottomSheet` | Show modal bottom sheet | `title`, `message`, `buttonText` | `{"title": "Options", "message": "Choose"}` |
-| `navigate` | Navigate to route | `route`, `type` (push/pushReplacement/pop) | `{"route": "/home", "type": "push"}` |
-
----
-
-#### 📐 Column / Row Widget
-
-```json
-{
-  "type": "column",  // or "row"
-  "properties": {
-    "mainAxisAlignment": "center",        // Optional: alignment along main axis
-    "crossAxisAlignment": "stretch",      // Optional: alignment along cross axis
-    "padding": 16,                        // Optional: padding around the whole column/row
-    "margin": [8, 16, 8, 16]              // Optional: margin around the whole column/row
-  },
-  "children": []                           // Required: list of child components
-}
-```
-
-**MainAxisAlignment Options:**
-- `start` - Children at the start
-- `center` - Children centered
-- `end` - Children at the end
-- `spaceBetween` - Space evenly between children
-- `spaceAround` - Space evenly around children
-- `spaceEvenly` - Space evenly including ends
-
-**CrossAxisAlignment Options:**
-- `start` - Children at the start
-- `center` - Children centered
-- `end` - Children at the end
-- `stretch` - Children stretch to fill
+| `launchUrl` | Open URL in browser | `url`, `mode` | `{"url": "https://flutter.dev"}` |
+| `showBottomSheet` | Show modal bottom sheet | `title`, `message`, `buttonText` | `{"title": "Options"}` |
+| `navigate` | Navigate to route | `route`, `type` | `{"route": "/home", "type": "push"}` |
 
 ---
 
 ## 🎯 Complete Examples
 
-### 🔐 Login Form Example
+### 📝 Multi-Form Demo
 
 ```dart
-String loginFormJson = '''
+// Register multiple form callbacks
+DynamicUIRenderer.registerFormCallback('login_form', (formId, formData) {
+  print('Login: $formData');
+});
+
+DynamicUIRenderer.registerFormCallback('register_form', (formId, formData) {
+  print('Registration: $formData');
+});
+
+// Render forms with different IDs
+Column(
+  children: [
+    DynamicUIRenderer.fromJsonString(loginFormJson, context, formId: 'login_form'),
+    DynamicUIRenderer.fromJsonString(registerFormJson, context, formId: 'register_form'),
+  ],
+);
+```
+
+### 🔄 Dynamic Layout with Order Property
+
+```json
 {
-  "type": "column",
-  "properties": {
-    "crossAxisAlignment": "stretch",
-    "padding": 20
-  },
-  "children": [
-    {
-      "type": "text",
-      "properties": {
-        "text": "Welcome Back! 👋",
-        "fontSize": 28,
-        "fontWeight": "bold",
-        "color": "#1976D2",
-        "textAlign": "center"
-      }
-    },
-    {
-      "type": "container",
-      "properties": {
-        "padding": 20,
-        "margin": [0, 20, 0, 0],
-        "color": "#FFFFFF",
-        "borderRadius": 12
-      },
-      "children": [
-        {
-          "type": "column",
-          "properties": {
-            "crossAxisAlignment": "stretch"
-          },
-          "children": [
-            {
-              "type": "text",
-              "properties": {
-                "text": "Email",
-                "fontSize": 14,
-                "fontWeight": "bold",
-                "color": "#757575"
-              }
-            },
-            {
-              "type": "container",
-              "properties": {
-                "padding": 16,
-                "margin": [0, 4, 0, 16],
-                "color": "#F5F5F5",
-                "borderRadius": 8
-              },
-              "children": [
-                {
-                  "type": "text",
-                  "properties": {
-                    "text": "user@example.com",
-                    "color": "#212121"
-                  }
-                }
-              ]
-            },
-            {
-              "type": "text",
-              "properties": {
-                "text": "Password",
-                "fontSize": 14,
-                "fontWeight": "bold",
-                "color": "#757575"
-              }
-            },
-            {
-              "type": "container",
-              "properties": {
-                "padding": 16,
-                "margin": [0, 4, 0, 0],
-                "color": "#F5F5F5",
-                "borderRadius": 8
-              },
-              "children": [
-                {
-                  "type": "text",
-                  "properties": {
-                    "text": "••••••••",
-                    "color": "#212121"
-                  }
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "type": "button",
-      "properties": {
-        "text": "Login",
-        "backgroundColor": "#1976D2",
-        "foregroundColor": "#FFFFFF",
-        "borderRadius": 8,
-        "margin": [0, 20, 0, 0],
-        "padding": 16
-      },
-      "actions": {
-        "type": "showDialog",
-        "parameters": {
-          "title": "Success! 🎉",
-          "message": "Logged in successfully",
-          "buttonText": "Continue"
-        }
-      }
-    }
+  "type": "form",
+  "fields": [
+    {"name": "field1", "type": "text", "label": "Field 1", "order": 3},
+    {"name": "field2", "type": "text", "label": "Field 2", "order": 1},
+    {"name": "field3", "type": "text", "label": "Field 3", "order": 2}
   ]
 }
-''';
-
-Widget loginForm = DynamicUIRenderer.fromJsonString(loginFormJson, context);
+// Fields will render in order: field2, field3, field1
 ```
 
 ### 🌐 Fetch UI from Server
 
 ```dart
-import 'package:http/http.dart' as http;
-
-Future<Widget> fetchUIFromServer(BuildContext context) async {
+Future<Widget> fetchUIFromServer(BuildContext context, String formId) async {
   try {
     final response = await http.get(
-      Uri.parse('https://api.example.com/ui/home')
+      Uri.parse('https://api.example.com/forms/$formId')
     );
 
     if (response.statusCode == 200) {
-      return DynamicUIRenderer.fromJsonString(response.body, context);
+      return DynamicUIRenderer.fromJsonString(
+        response.body, 
+        context,
+        formId: formId,
+      );
     }
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, color: Colors.red, size: 48),
-          const SizedBox(height: 16),
-          Text('Failed to load UI: ${response.statusCode}'),
-        ],
-      ),
-    );
+    return Text('Error: ${response.statusCode}');
   } catch (e) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.wifi_off, color: Colors.orange, size: 48),
-          const SizedBox(height: 16),
-          Text('Network error: $e'),
-          const SizedBox(height: 8),
-          ElevatedButton(
-            onPressed: () {
-              // Retry logic
-            },
-            child: const Text('Retry'),
-          ),
-        ],
-      ),
-    );
+    return Text('Network error: $e');
   }
 }
 ```
@@ -455,6 +456,10 @@ The example app includes:
 - 📱 **Core Widgets Demo** - Basic widgets showcase
 - 🎨 **Styling Properties Demo** - Colors, fonts, padding, margins
 - 📐 **Layout Examples Demo** - Different alignments and arrangements
+- 📝 **Multi-Form Demo** - Three independent forms with real-time data display
+  - Registration Form with all field types
+  - Contact Form with dropdown and textarea
+  - Dynamic Layout Form with toggleable field order
 - ⚠️ **Error Handling Demo** - Graceful fallbacks for unsupported widgets
 
 ---
@@ -463,18 +468,21 @@ The example app includes:
 
 ```
 JSON → UIComponent (Model) → WidgetFactory → Flutter Widget
-        ↓
-    Properties Parser
-        ↓
-    Action Handler (Navigation, Dialogs, etc.)
+        ↓              ↓
+   Form Models    Properties Parser
+        ↓              ↓
+FormController    Action Handler
+        ↓              ↓
+  Validation      Navigation/Dialogs
 ```
 
 The package follows a clean, modular architecture:
 1. **JSON Parsing** - Converts JSON to type-safe models
-2. **Widget Factory** - Maps component types to Flutter widgets
-3. **Property Parsers** - Safely converts JSON values to Flutter types
-4. **Action Handler** - Executes user interactions
-5. **Context Propagation** - Automatically passes BuildContext for navigation
+2. **Form Models** - Type-safe field and validation rule definitions
+3. **FormController** - Manages form state, validation, and submissions
+4. **Widget Factory** - Maps component types to Flutter widgets
+5. **Property Parsers** - Safely converts JSON values to Flutter types
+6. **Action Handler** - Executes user interactions
 
 ---
 
@@ -491,6 +499,21 @@ flutter test --coverage
 genhtml coverage/lcov.info -o coverage/html
 # Then open coverage/html/index.html
 ```
+
+---
+
+## 📊 Package Statistics
+
+| Metric | Value |
+|--------|-------|
+| **Latest Version** | v0.2.0 |
+| **Published** | February 2026 |
+| **License** | MIT |
+| **Platforms** | Android, iOS, Web, macOS, Linux, Windows |
+| **Dependencies** | `url_launcher` (automatically included) |
+| **Field Types** | 10+ |
+| **Validation Rules** | 12+ |
+| **Test Coverage** | 95%+ |
 
 ---
 
@@ -519,12 +542,6 @@ Contributions are welcome! Whether it's:
    ```
 5. Open a Pull Request
 
-Please ensure your code:
-- Passes all tests (`flutter test`)
-- Follows Dart style guidelines (`dart format .`)
-- Includes tests for new features
-- Updates documentation as needed
-
 ---
 
 ## 📄 License
@@ -541,18 +558,6 @@ This project is licensed under the MIT License - see the [LICENSE](https://pub.d
 
 ---
 
-## 📊 Package Statistics
-
-| Metric | Value |
-|--------|-------|
-| **Latest Version** | v0.1.0 |
-| **Published** | February 2026 |
-| **License** | MIT |
-| **Platforms** | Android, iOS, Web, macOS, Linux, Windows |
-| **Dependencies** | `url_launcher` (automatically included) |
-
----
-
 ## 📞 Support
 
 - 📧 **Email**: [webdevjash6@gmail.com](mailto:webdevjash6@gmail.com)
@@ -561,16 +566,17 @@ This project is licensed under the MIT License - see the [LICENSE](https://pub.d
 
 ---
 
-## 🔮 Coming Soon 
+## 🔮 Coming Soon (v0.3.0)
 
-- ✅ **Forms & Validation** - Form widgets with built-in validation
-- ✅ **Network Fetching** - Load UI directly from URLs
-- ✅ **Caching** - Cache UI definitions locally
-- ✅ **Custom Widget Registry** - Register your own widgets
-- ✅ **Theme Support** - Dynamic theming from JSON
+- 🚀 **Network Fetching** - Load UI directly from URLs
+- 💾 **Caching** - Cache UI definitions locally
+- 🧩 **Custom Widget Registry** - Register your own widgets
+- 🎨 **Theme Support** - Dynamic theming from JSON
+- 📦 **Plugin System** - Easy third-party integrations
 
 ---
 
+<div align="center">
 
 **Made with ❤️ by [Jashwanth Gowda R](https://github.com/Jashwanth-Gowda-R)**
 
@@ -578,6 +584,7 @@ If you find this package useful, please consider:
 - ⭐ **Starring** the [GitHub repository](https://github.com/Jashwanth-Gowda-R/dynamic_ui_renderer)
 - 📢 **Sharing** it with others
 - 🐛 **Reporting** issues
-- 💡 **Suggesting** features
+-  💡 **Suggesting** features
 
-```
+</div>
+

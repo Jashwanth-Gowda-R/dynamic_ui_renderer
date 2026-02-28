@@ -1,14 +1,33 @@
 // library dynamic_ui_renderer;
 
 // Export key classes for users who need direct access
-export 'src/models/ui_component.dart';
-export 'src/actions/action_models.dart';
 export 'src/actions/action_handler.dart';
+export 'src/actions/action_models.dart';
+export 'src/models/ui_component.dart';
+
+// Core
+export 'src/models/form_models.dart';
+export 'src/core/utils.dart';
+export 'src/core/form_controller.dart';
+
+// Widgets
+export 'src/widgets/dynamic_form.dart';
+export 'src/widgets/form_fields/text_field.dart';
+export 'src/widgets/form_fields/email_field.dart';
+export 'src/widgets/form_fields/password_field.dart';
+export 'src/widgets/form_fields/number_field.dart';
+export 'src/widgets/form_fields/dropdown_field.dart';
+export 'src/widgets/form_fields/checkbox_field.dart';
+export 'src/widgets/form_fields/date_field.dart';
+export 'src/widgets/form_fields/phone_field.dart';
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'src/models/ui_component.dart';
 import 'src/core/widget_factory.dart';
+
+typedef FormSubmitCallback =
+    void Function(String formId, Map<String, dynamic> formData);
 
 /// The main entry point for the dynamic_ui_renderer package
 ///
@@ -25,11 +44,24 @@ class DynamicUIRenderer {
   ///   }
   /// ''');
   /// ```
-  static Widget fromJsonString(String jsonString, BuildContext context) {
+  static Widget fromJsonString(
+    String jsonString,
+    BuildContext context, {
+    String? formId,
+  }) {
     try {
       final Map<String, dynamic> json = Map<String, dynamic>.from(
         jsonDecode(jsonString) as Map,
       );
+
+      // Add formId to properties if provided
+      if (formId != null) {
+        if (!json.containsKey('properties')) {
+          json['properties'] = {};
+        }
+        (json['properties'] as Map)['formId'] = formId;
+      }
+
       final component = UIComponent.fromJson(json);
 
       // Store context for actions that need navigation
@@ -50,7 +82,18 @@ class DynamicUIRenderer {
   ///   "properties": {"text": "Hello World"}
   /// });
   /// ```
-  static Widget fromJsonMap(Map<String, dynamic> json, BuildContext context) {
+  static Widget fromJsonMap(
+    Map<String, dynamic> json,
+    BuildContext context, {
+    String? formId,
+  }) {
+    // Add formId to properties if provided
+    if (formId != null) {
+      if (!json.containsKey('properties')) {
+        json['properties'] = {};
+      }
+      (json['properties'] as Map)['formId'] = formId;
+    }
     try {
       final component = UIComponent.fromJson(json);
 
@@ -81,5 +124,29 @@ class DynamicUIRenderer {
         ],
       ),
     );
+  }
+
+  static final Map<String, FormSubmitCallback> _formCallbacks = {};
+  static String? _defaultFormId;
+
+  /// Register a callback for a specific form ID
+  static void registerFormCallback(String formId, FormSubmitCallback callback) {
+    _formCallbacks[formId] = callback;
+  }
+
+  /// Set default form ID for forms without explicit ID
+  static void setDefaultFormId(String formId) {
+    _defaultFormId = formId;
+  }
+
+  /// Get callback for a form ID
+  static FormSubmitCallback? getFormCallback(String? formId) {
+    if (formId == null) return null;
+    return _formCallbacks[formId];
+  }
+
+  /// Clear all registered callbacks
+  static void clearCallbacks() {
+    _formCallbacks.clear();
   }
 }

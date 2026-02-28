@@ -1,6 +1,6 @@
+import 'package:dynamic_ui_renderer/src/actions/action_models.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'action_models.dart';
 
 /// Handles all button actions
 class ActionHandler {
@@ -105,6 +105,15 @@ class ActionHandler {
     BuildContext context,
     Map<String, dynamic> params,
   ) {
+    // Check if form data is included
+    if (params.containsKey('formData')) {
+      debugPrint('Form Data Received:');
+      final formData = params['formData'] as Map<String, dynamic>;
+      formData.forEach((key, value) {
+        debugPrint('   • $key: $value');
+      });
+    }
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -186,54 +195,64 @@ class ActionHandler {
       return;
     }
 
-    final uri = Uri.parse(url);
-
     try {
-      if (mode == 'inApp') {
-        // For in-app browser, you might want to use a package like webview_flutter
-        // For now, we'll just launch externally
-        if (await canLaunchUrl(uri)) {
+      final uri = Uri.parse(url);
+
+      if (await canLaunchUrl(uri)) {
+        if (mode == 'external') {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        } else {
           await launchUrl(uri);
         }
+        debugPrint('Launched URL: $url');
       } else {
-        if (await canLaunchUrl(uri)) {
-          await launchUrl(uri, mode: LaunchMode.externalApplication);
-        }
+        _showUrlLaunchError(context, url);
       }
-      debugPrint('Launched URL: $url');
     } catch (e) {
       debugPrint('Failed to launch URL: $e');
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Could not launch URL: $url'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showUrlLaunchError(context, url);
     }
+  }
+
+  static void _showUrlLaunchError(BuildContext context, String url) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Could not launch URL: $url'),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
   static void _handlePrint(Map<String, dynamic> params) {
     final message = params['message'] ?? 'Button pressed';
     final level = params['level'] ?? 'info';
 
-    switch (level) {
-      case 'info':
-        debugPrint('ℹ️ $message');
-        break;
-      case 'warning':
-        debugPrint('⚠️ $message');
-        break;
-      case 'error':
-        debugPrint('❌ $message');
-        break;
-      default:
-        debugPrint('📢 $message');
+    // If form data is included, print it nicely
+    if (params.containsKey('formData')) {
+      // debugPrint('\n📋 ===== FORM SUBMISSION =====');
+      // final formData = params['formData'] as Map<String, dynamic>;
+      // formData.forEach((key, value) {
+      //   debugPrint('   • $key: $value');
+      // });
+      // debugPrint('📋 ===========================\n');
+    } else {
+      switch (level) {
+        case 'info':
+          debugPrint('ℹ️ $message');
+          break;
+        case 'warning':
+          debugPrint('⚠️ $message');
+          break;
+        case 'error':
+          debugPrint('❌ $message');
+          break;
+        default:
+          debugPrint('📢 $message');
+      }
     }
   }
 
   static void _handleCustom(Map<String, dynamic> params) {
-    // This will be extended by the plugin system later
-    debugPrint('🔧 Custom action: $params');
+    // debugPrint('🔧 Custom action: $params');
   }
 }

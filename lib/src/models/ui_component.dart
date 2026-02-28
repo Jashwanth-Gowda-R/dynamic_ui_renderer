@@ -21,9 +21,19 @@ class UIComponent {
   /// Creates a UIComponent from JSON
   /// This is where JSON becomes a Dart object
   factory UIComponent.fromJson(Map<String, dynamic> json) {
+    // Handle fields specially if they exist
+    Map<String, dynamic> properties = {};
+    if (json.containsKey('properties')) {
+      properties = Map<String, dynamic>.from(json['properties'] as Map);
+    }
+
+    // If there's a 'fields' key at root level, add it to properties
+    if (json.containsKey('fields')) {
+      properties['fields'] = json['fields'];
+    }
     return UIComponent(
       type: json['type'] as String,
-      properties: json['properties'] as Map<String, dynamic>? ?? {},
+      properties: properties,
       children:
           (json['children'] as List?)
               ?.map((c) => UIComponent.fromJson(c as Map<String, dynamic>))

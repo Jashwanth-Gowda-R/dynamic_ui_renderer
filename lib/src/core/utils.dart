@@ -25,24 +25,35 @@ class UIUtils {
     return null;
   }
 
-  /// Parses color strings (#RRGGBB or #AARRGGBB)
+  /// Parses color strings (#RRGGBB or #AARRGGBB or #RGB)
   static Color? parseColor(String? colorString) {
-    if (colorString == null) return null;
+    if (colorString == null || colorString.isEmpty) return null;
 
-    if (colorString.startsWith('#')) {
-      final hex = colorString.substring(1);
+    String hex = colorString.replaceFirst('#', '');
 
-      // #RRGGBB format
-      if (hex.length == 6) {
-        return Color(int.parse('FF$hex', radix: 16));
-      }
-      // #AARRGGBB format
-      if (hex.length == 8) {
-        return Color(int.parse(hex, radix: 16));
-      }
+    // Handle 3-digit hex (e.g., #F00 -> #FF0000)
+    if (hex.length == 3) {
+      hex = hex.split('').map((c) => '$c$c').join();
     }
 
-    return null;
+    // Handle 4-digit hex with alpha (e.g., #80F -> #80FF0000 format)
+    if (hex.length == 4) {
+      final alpha = hex[0];
+      final rgb = hex.substring(1);
+      final expandedRgb = rgb.split('').map((c) => '$c$c').join();
+      hex = '$alpha$expandedRgb';
+    }
+
+    // Add opacity if not present (for 6-digit RGB)
+    if (hex.length == 6) {
+      hex = 'FF$hex';
+    }
+
+    try {
+      return Color(int.parse(hex, radix: 16));
+    } catch (e) {
+      return null;
+    }
   }
 
   /// Parses font weight strings

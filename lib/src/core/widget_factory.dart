@@ -1,8 +1,8 @@
 import 'package:dynamic_ui_renderer/src/actions/action_handler.dart';
+import 'package:dynamic_ui_renderer/src/core/utils.dart';
 import 'package:dynamic_ui_renderer/src/models/ui_component.dart';
+import 'package:dynamic_ui_renderer/src/widgets/dynamic_form.dart';
 import 'package:flutter/material.dart';
-
-import 'utils.dart';
 
 /// The heart of the package - converts UIComponents to Flutter widgets
 class WidgetFactory {
@@ -19,6 +19,8 @@ class WidgetFactory {
         return _buildColumn(component);
       case 'row':
         return _buildRow(component);
+      case 'form':
+        return DynamicForm(component: component);
       default:
         return _buildUnsupported(component);
     }
