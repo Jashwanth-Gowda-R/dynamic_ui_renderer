@@ -2,11 +2,12 @@
 abstract class NetworkException implements Exception {
   final String message;
   final Uri? uri;
-  
+
   NetworkException(this.message, {this.uri});
-  
+
   @override
-  String toString() => 'NetworkException: $message${uri != null ? ' at $uri' : ''}';
+  String toString() =>
+      'NetworkException: $message${uri != null ? ' at $uri' : ''}';
 }
 
 /// Thrown when request times out
@@ -23,8 +24,8 @@ class NoInternetException extends NetworkException {
 class HttpException extends NetworkException {
   final int statusCode;
   final String? responseBody;
-  
-  HttpException(this.statusCode, this.responseBody, Uri uri) 
+
+  HttpException(this.statusCode, this.responseBody, Uri uri)
     : super('HTTP Error $statusCode', uri: uri);
 }
 
@@ -45,6 +46,6 @@ class UnknownNetworkException extends NetworkException {
 
 /// Thrown when max retries exceeded
 class MaxRetriesExceededException extends NetworkException {
-  MaxRetriesExceededException(Uri uri) 
+  MaxRetriesExceededException(Uri uri)
     : super('Max retries exceeded', uri: uri);
 }

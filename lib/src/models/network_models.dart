@@ -1,10 +1,10 @@
 /// HTTP methods supported for network requests
 enum HttpMethod {
-  get,      // Fetch data
-  post,     // Send data to create something
-  put,      // Send data to update something
-  patch,    // Send partial data to update
-  delete,   // Remove something
+  get, // Fetch data
+  post, // Send data to create something
+  put, // Send data to update something
+  patch, // Send partial data to update
+  delete, // Remove something
 }
 
 /// Configuration for a network request
@@ -31,7 +31,7 @@ class NetworkRequest {
   Uri get uri {
     final uri = Uri.parse(url);
     if (queryParams == null) return uri;
-    
+
     return uri.replace(
       queryParameters: {
         ...uri.queryParameters,
@@ -69,13 +69,9 @@ class NetworkResponse {
   final Map<String, String>? headers;
   final String? error;
 
-  const NetworkResponse({
-    this.data,
-    this.statusCode,
-    this.headers,
-    this.error,
-  });
+  const NetworkResponse({this.data, this.statusCode, this.headers, this.error});
 
-  bool get isSuccess => statusCode != null && statusCode! >= 200 && statusCode! < 300;
+  bool get isSuccess =>
+      statusCode != null && statusCode! >= 200 && statusCode! < 300;
   bool get hasData => data != null;
 }

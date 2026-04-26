@@ -14,7 +14,8 @@ class HttpClient {
     try {
       // Build the request
       final uri = request.uri;
-      final hasBody = request.method == HttpMethod.post ||
+      final hasBody =
+          request.method == HttpMethod.post ||
           request.method == HttpMethod.put ||
           request.method == HttpMethod.patch;
       final headers = {

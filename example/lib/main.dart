@@ -548,8 +548,7 @@ class _HomePageState extends State<HomePage> {
             if (_networkDemoScenario != null) ...[
               const SizedBox(width: 8),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: _scenarioColor().shade100,
                   borderRadius: BorderRadius.circular(20),
@@ -610,10 +609,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 )
-              : NetworkLoader(
-                  key: ValueKey(_networkDemoKey),
-                  request: request,
-                ),
+              : NetworkLoader(key: ValueKey(_networkDemoKey), request: request),
         ),
       ],
     );
@@ -686,11 +682,23 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildExceptionTable() {
     final rows = [
-      (Colors.blue, 'TimeoutException', 'Request exceeded the timeout duration'),
+      (
+        Colors.blue,
+        'TimeoutException',
+        'Request exceeded the timeout duration',
+      ),
       (Colors.red, 'NoInternetException', 'No network connectivity detected'),
       (Colors.orange, 'HttpException', 'Server returned a non-2xx status code'),
-      (Colors.purple, 'InvalidJsonException', 'Response body is not valid JSON'),
-      (Colors.teal, 'MaxRetriesExceededException', 'All retry attempts exhausted'),
+      (
+        Colors.purple,
+        'InvalidJsonException',
+        'Response body is not valid JSON',
+      ),
+      (
+        Colors.teal,
+        'MaxRetriesExceededException',
+        'All retry attempts exhausted',
+      ),
     ];
 
     return Column(

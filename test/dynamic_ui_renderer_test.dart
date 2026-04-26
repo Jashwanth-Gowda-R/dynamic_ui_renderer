@@ -1323,11 +1323,13 @@ void main() {
         return http.Response(uiJson, 200);
       });
       final client = HttpClient(client: mock);
-      await client.execute(NetworkRequest(
-        url: 'https://example.com/ui',
-        method: HttpMethod.post,
-        body: {'theme': 'dark'},
-      ));
+      await client.execute(
+        NetworkRequest(
+          url: 'https://example.com/ui',
+          method: HttpMethod.post,
+          body: {'theme': 'dark'},
+        ),
+      );
 
       final decoded = jsonDecode(capturedBody!) as Map;
       expect(decoded['theme'], 'dark');
@@ -1341,10 +1343,12 @@ void main() {
         return http.Response(uiJson, 200);
       });
       final client = HttpClient(client: mock);
-      await client.execute(NetworkRequest(
-        url: 'https://example.com/ui',
-        headers: {'Authorization': 'Bearer token123'},
-      ));
+      await client.execute(
+        NetworkRequest(
+          url: 'https://example.com/ui',
+          headers: {'Authorization': 'Bearer token123'},
+        ),
+      );
 
       expect(capturedHeaders?['Authorization'], 'Bearer token123');
       // Content-Type is NOT added for GET (no body — avoids CORS preflight on web)
@@ -1356,8 +1360,11 @@ void main() {
       final client = clientWith(404, 'Not Found');
 
       expect(
-        () => client.execute(const NetworkRequest(url: 'https://example.com/ui')),
-        throwsA(isA<HttpException>().having((e) => e.statusCode, 'statusCode', 404)),
+        () =>
+            client.execute(const NetworkRequest(url: 'https://example.com/ui')),
+        throwsA(
+          isA<HttpException>().having((e) => e.statusCode, 'statusCode', 404),
+        ),
       );
       client.dispose();
     });
@@ -1366,21 +1373,29 @@ void main() {
       final client = clientWith(500, 'Internal Server Error');
 
       expect(
-        () => client.execute(const NetworkRequest(url: 'https://example.com/ui')),
-        throwsA(isA<HttpException>().having((e) => e.statusCode, 'statusCode', 500)),
+        () =>
+            client.execute(const NetworkRequest(url: 'https://example.com/ui')),
+        throwsA(
+          isA<HttpException>().having((e) => e.statusCode, 'statusCode', 500),
+        ),
       );
       client.dispose();
     });
 
-    test('execute() throws InvalidJsonException when response is not JSON', () async {
-      final client = clientWith(200, 'this is not json');
+    test(
+      'execute() throws InvalidJsonException when response is not JSON',
+      () async {
+        final client = clientWith(200, 'this is not json');
 
-      expect(
-        () => client.execute(const NetworkRequest(url: 'https://example.com/ui')),
-        throwsA(isA<InvalidJsonException>()),
-      );
-      client.dispose();
-    });
+        expect(
+          () => client.execute(
+            const NetworkRequest(url: 'https://example.com/ui'),
+          ),
+          throwsA(isA<InvalidJsonException>()),
+        );
+        client.dispose();
+      },
+    );
 
     test('executeWithRetry() does not retry on 4xx errors', () async {
       int callCount = 0;
@@ -1391,10 +1406,9 @@ void main() {
       final client = HttpClient(client: mock);
 
       await expectLater(
-        client.executeWithRetry(NetworkRequest(
-          url: 'https://example.com/ui',
-          maxRetries: 3,
-        )),
+        client.executeWithRetry(
+          NetworkRequest(url: 'https://example.com/ui', maxRetries: 3),
+        ),
         throwsA(isA<HttpException>()),
       );
       // Should only be called once — no retries on 4xx
@@ -1411,11 +1425,13 @@ void main() {
       final client = HttpClient(client: mock);
 
       await expectLater(
-        client.executeWithRetry(NetworkRequest(
-          url: 'https://example.com/ui',
-          maxRetries: 2,
-          timeout: Duration(milliseconds: 100),
-        )),
+        client.executeWithRetry(
+          NetworkRequest(
+            url: 'https://example.com/ui',
+            maxRetries: 2,
+            timeout: Duration(milliseconds: 100),
+          ),
+        ),
         throwsA(isA<HttpException>()),
       );
       expect(callCount, 2);
@@ -1431,11 +1447,13 @@ void main() {
       });
       final client = HttpClient(client: mock);
 
-      final response = await client.executeWithRetry(NetworkRequest(
-        url: 'https://example.com/ui',
-        maxRetries: 3,
-        timeout: Duration(milliseconds: 100),
-      ));
+      final response = await client.executeWithRetry(
+        NetworkRequest(
+          url: 'https://example.com/ui',
+          maxRetries: 3,
+          timeout: Duration(milliseconds: 100),
+        ),
+      );
 
       expect(response.isSuccess, true);
       expect(callCount, 2);
