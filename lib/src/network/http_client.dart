@@ -14,7 +14,13 @@ class HttpClient {
     try {
       // Build the request
       final uri = request.uri;
-      final headers = {'Content-Type': 'application/json', ...?request.headers};
+      final hasBody = request.method == HttpMethod.post ||
+          request.method == HttpMethod.put ||
+          request.method == HttpMethod.patch;
+      final headers = {
+        if (hasBody) 'Content-Type': 'application/json',
+        ...?request.headers,
+      };
 
       late http.Request httpRequest;
 

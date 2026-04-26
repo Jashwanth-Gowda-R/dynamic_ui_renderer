@@ -1347,8 +1347,8 @@ void main() {
       ));
 
       expect(capturedHeaders?['Authorization'], 'Bearer token123');
-      // Content-Type is always added
-      expect(capturedHeaders?['Content-Type'], 'application/json');
+      // Content-Type is NOT added for GET (no body — avoids CORS preflight on web)
+      expect(capturedHeaders?['Content-Type'], isNull);
       client.dispose();
     });
 
