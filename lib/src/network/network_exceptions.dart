@@ -40,8 +40,7 @@ class RequestCancelledException extends NetworkException {
 
 /// Thrown for unknown network errors
 class UnknownNetworkException extends NetworkException {
-  UnknownNetworkException(String message, {Uri? uri}) 
-    : super(message, uri: uri);
+  UnknownNetworkException(super.message, {super.uri});
 }
 
 /// Thrown when max retries exceeded

@@ -1,7 +1,11 @@
+import 'dart:convert';
 import 'package:dynamic_ui_renderer/dynamic_ui_renderer.dart';
 import 'package:dynamic_ui_renderer/src/core/utils.dart' as utils;
+import 'package:dynamic_ui_renderer/src/network/http_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 
 void main() {
   group('UIComponent Parsing Tests', () {
@@ -1128,6 +1132,314 @@ void main() {
       expect(field.type, FieldType.textarea);
       expect(field.uiProperties?['minLines'], 3);
       expect(field.uiProperties?['maxLines'], 5);
+    });
+  });
+
+  group('NetworkRequest Tests', () {
+    test('Builds URI without query params', () {
+      final request = NetworkRequest(url: 'https://example.com/ui');
+      expect(request.uri.toString(), 'https://example.com/ui');
+    });
+
+    test('Builds URI with query params', () {
+      final request = NetworkRequest(
+        url: 'https://example.com/ui',
+        queryParams: {'theme': 'dark', 'lang': 'en'},
+      );
+      final uri = request.uri;
+      expect(uri.queryParameters['theme'], 'dark');
+      expect(uri.queryParameters['lang'], 'en');
+    });
+
+    test('Preserves existing query params from URL', () {
+      final request = NetworkRequest(
+        url: 'https://example.com/ui?version=2',
+        queryParams: {'theme': 'dark'},
+      );
+      final uri = request.uri;
+      expect(uri.queryParameters['version'], '2');
+      expect(uri.queryParameters['theme'], 'dark');
+    });
+
+    test('copyWith overrides only specified fields', () {
+      const original = NetworkRequest(
+        url: 'https://example.com/ui',
+        method: HttpMethod.get,
+        maxRetries: 3,
+      );
+      final copy = original.copyWith(
+        method: HttpMethod.post,
+        timeout: Duration(seconds: 10),
+      );
+      expect(copy.url, original.url);
+      expect(copy.method, HttpMethod.post);
+      expect(copy.maxRetries, 3);
+      expect(copy.timeout, const Duration(seconds: 10));
+    });
+
+    test('Default method is GET', () {
+      const request = NetworkRequest(url: 'https://example.com/ui');
+      expect(request.method, HttpMethod.get);
+    });
+
+    test('Default maxRetries is 3', () {
+      const request = NetworkRequest(url: 'https://example.com/ui');
+      expect(request.maxRetries, 3);
+    });
+  });
+
+  group('NetworkResponse Tests', () {
+    test('isSuccess true for 2xx status codes', () {
+      const r200 = NetworkResponse(statusCode: 200, data: {});
+      const r201 = NetworkResponse(statusCode: 201, data: {});
+      const r299 = NetworkResponse(statusCode: 299, data: {});
+      expect(r200.isSuccess, true);
+      expect(r201.isSuccess, true);
+      expect(r299.isSuccess, true);
+    });
+
+    test('isSuccess false for non-2xx status codes', () {
+      const r400 = NetworkResponse(statusCode: 400);
+      const r404 = NetworkResponse(statusCode: 404);
+      const r500 = NetworkResponse(statusCode: 500);
+      expect(r400.isSuccess, false);
+      expect(r404.isSuccess, false);
+      expect(r500.isSuccess, false);
+    });
+
+    test('hasData false when data is null', () {
+      const r = NetworkResponse(statusCode: 200);
+      expect(r.hasData, false);
+    });
+
+    test('hasData true when data is present', () {
+      const r = NetworkResponse(statusCode: 200, data: {'type': 'text'});
+      expect(r.hasData, true);
+    });
+  });
+
+  group('NetworkException Tests', () {
+    test('TimeoutException has correct message', () {
+      final uri = Uri.parse('https://example.com');
+      final e = TimeoutException(uri);
+      expect(e.message, 'Request timed out');
+      expect(e.uri, uri);
+    });
+
+    test('NoInternetException has correct message', () {
+      final e = NoInternetException();
+      expect(e.message, 'No internet connection');
+      expect(e.uri, isNull);
+    });
+
+    test('HttpException carries status code and body', () {
+      final uri = Uri.parse('https://example.com');
+      final e = HttpException(404, 'Not Found', uri);
+      expect(e.statusCode, 404);
+      expect(e.responseBody, 'Not Found');
+      expect(e.message, 'HTTP Error 404');
+    });
+
+    test('InvalidJsonException has correct message', () {
+      final uri = Uri.parse('https://example.com');
+      final e = InvalidJsonException(uri);
+      expect(e.message, 'Invalid JSON response');
+    });
+
+    test('MaxRetriesExceededException has correct message', () {
+      final uri = Uri.parse('https://example.com');
+      final e = MaxRetriesExceededException(uri);
+      expect(e.message, 'Max retries exceeded');
+    });
+
+    test('UnknownNetworkException stores custom message', () {
+      final e = UnknownNetworkException('Something went wrong');
+      expect(e.message, 'Something went wrong');
+    });
+
+    test('NetworkException toString includes URI', () {
+      final uri = Uri.parse('https://example.com');
+      final e = TimeoutException(uri);
+      expect(e.toString(), contains('https://example.com'));
+    });
+  });
+
+  group('HttpMethod Tests', () {
+    test('All HttpMethod values are accessible', () {
+      expect(HttpMethod.values, contains(HttpMethod.get));
+      expect(HttpMethod.values, contains(HttpMethod.post));
+      expect(HttpMethod.values, contains(HttpMethod.put));
+      expect(HttpMethod.values, contains(HttpMethod.patch));
+      expect(HttpMethod.values, contains(HttpMethod.delete));
+      expect(HttpMethod.values.length, 5);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // HttpClient tests — use MockClient to simulate server responses, no real
+  // network needed. MockClient intercepts every http.Client.send() call and
+  // returns whatever response you define in the callback.
+  // ---------------------------------------------------------------------------
+  group('HttpClient Tests', () {
+    // Helper: build a MockClient that always returns the same response
+    HttpClient clientWith(int statusCode, String body) {
+      final mock = MockClient((request) async {
+        return http.Response(body, statusCode);
+      });
+      return HttpClient(client: mock);
+    }
+
+    const uiJson = '{"type":"text","properties":{"text":"Hello"}}';
+
+    test('execute() returns NetworkResponse for 200 with valid JSON', () async {
+      final client = clientWith(200, uiJson);
+      final response = await client.execute(
+        const NetworkRequest(url: 'https://example.com/ui'),
+      );
+
+      expect(response.isSuccess, true);
+      expect(response.statusCode, 200);
+      expect(response.data?['type'], 'text');
+      client.dispose();
+    });
+
+    test('execute() sends GET by default', () async {
+      String? capturedMethod;
+      final mock = MockClient((request) async {
+        capturedMethod = request.method;
+        return http.Response(uiJson, 200);
+      });
+      final client = HttpClient(client: mock);
+      await client.execute(const NetworkRequest(url: 'https://example.com/ui'));
+
+      expect(capturedMethod, 'GET');
+      client.dispose();
+    });
+
+    test('execute() sends POST with body', () async {
+      String? capturedBody;
+      final mock = MockClient((request) async {
+        capturedBody = request.body;
+        return http.Response(uiJson, 200);
+      });
+      final client = HttpClient(client: mock);
+      await client.execute(NetworkRequest(
+        url: 'https://example.com/ui',
+        method: HttpMethod.post,
+        body: {'theme': 'dark'},
+      ));
+
+      final decoded = jsonDecode(capturedBody!) as Map;
+      expect(decoded['theme'], 'dark');
+      client.dispose();
+    });
+
+    test('execute() sends custom headers', () async {
+      Map<String, String>? capturedHeaders;
+      final mock = MockClient((request) async {
+        capturedHeaders = request.headers;
+        return http.Response(uiJson, 200);
+      });
+      final client = HttpClient(client: mock);
+      await client.execute(NetworkRequest(
+        url: 'https://example.com/ui',
+        headers: {'Authorization': 'Bearer token123'},
+      ));
+
+      expect(capturedHeaders?['Authorization'], 'Bearer token123');
+      // Content-Type is always added
+      expect(capturedHeaders?['Content-Type'], 'application/json');
+      client.dispose();
+    });
+
+    test('execute() throws HttpException on 404', () async {
+      final client = clientWith(404, 'Not Found');
+
+      expect(
+        () => client.execute(const NetworkRequest(url: 'https://example.com/ui')),
+        throwsA(isA<HttpException>().having((e) => e.statusCode, 'statusCode', 404)),
+      );
+      client.dispose();
+    });
+
+    test('execute() throws HttpException on 500', () async {
+      final client = clientWith(500, 'Internal Server Error');
+
+      expect(
+        () => client.execute(const NetworkRequest(url: 'https://example.com/ui')),
+        throwsA(isA<HttpException>().having((e) => e.statusCode, 'statusCode', 500)),
+      );
+      client.dispose();
+    });
+
+    test('execute() throws InvalidJsonException when response is not JSON', () async {
+      final client = clientWith(200, 'this is not json');
+
+      expect(
+        () => client.execute(const NetworkRequest(url: 'https://example.com/ui')),
+        throwsA(isA<InvalidJsonException>()),
+      );
+      client.dispose();
+    });
+
+    test('executeWithRetry() does not retry on 4xx errors', () async {
+      int callCount = 0;
+      final mock = MockClient((request) async {
+        callCount++;
+        return http.Response('Not Found', 404);
+      });
+      final client = HttpClient(client: mock);
+
+      await expectLater(
+        client.executeWithRetry(NetworkRequest(
+          url: 'https://example.com/ui',
+          maxRetries: 3,
+        )),
+        throwsA(isA<HttpException>()),
+      );
+      // Should only be called once — no retries on 4xx
+      expect(callCount, 1);
+      client.dispose();
+    });
+
+    test('executeWithRetry() retries on 500 up to maxRetries', () async {
+      int callCount = 0;
+      final mock = MockClient((request) async {
+        callCount++;
+        return http.Response('Server Error', 500);
+      });
+      final client = HttpClient(client: mock);
+
+      await expectLater(
+        client.executeWithRetry(NetworkRequest(
+          url: 'https://example.com/ui',
+          maxRetries: 2,
+          timeout: Duration(milliseconds: 100),
+        )),
+        throwsA(isA<HttpException>()),
+      );
+      expect(callCount, 2);
+      client.dispose();
+    });
+
+    test('executeWithRetry() succeeds on second attempt after 500', () async {
+      int callCount = 0;
+      final mock = MockClient((request) async {
+        callCount++;
+        if (callCount == 1) return http.Response('Server Error', 500);
+        return http.Response(uiJson, 200);
+      });
+      final client = HttpClient(client: mock);
+
+      final response = await client.executeWithRetry(NetworkRequest(
+        url: 'https://example.com/ui',
+        maxRetries: 3,
+        timeout: Duration(milliseconds: 100),
+      ));
+
+      expect(response.isSuccess, true);
+      expect(callCount, 2);
+      client.dispose();
     });
   });
 }

@@ -5,7 +5,9 @@ import 'package:http/http.dart' as http;
 
 /// Handles actual HTTP communication
 class HttpClient {
-  final http.Client _client = http.Client();
+  final http.Client _client;
+
+  HttpClient({http.Client? client}) : _client = client ?? http.Client();
 
   /// Execute a network request and return response
   Future<NetworkResponse> execute(NetworkRequest request) async {

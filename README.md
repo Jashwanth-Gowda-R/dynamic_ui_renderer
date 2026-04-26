@@ -14,7 +14,16 @@ A powerful Flutter package for rendering UI dynamically from JSON responses. Bui
 
 ---
 
-## ✨ Features (v0.2.0)
+## ✨ Features
+
+### 🌐 **Network Fetching (v0.3.0)**
+- ✅ **Load UI from URL** - Single-line API to fetch and render UI from any endpoint
+- ✅ **All HTTP Methods** - GET, POST, PUT, PATCH, DELETE with custom headers and body
+- ✅ **Auto Retry** - Exponential backoff with configurable max retries
+- ✅ **Smart Retry Logic** - Never retries 4xx errors; retries 5xx automatically
+- ✅ **Typed Exceptions** - Timeout, NoInternet, HTTP error, InvalidJSON, MaxRetries
+- ✅ **Custom Loading/Error UI** - Replace defaults with your own widgets
+- ✅ **Retry Button** - Built-in retry in the default error widget
 
 ### 📝 **Complete Forms & Validation System**
 - ✅ **Dynamic Form Widget** - Full-featured form container with validation
@@ -62,7 +71,7 @@ A powerful Flutter package for rendering UI dynamically from JSON responses. Bui
 - ✅ **Context propagation** - Automatic for navigation and dialogs
 - ✅ **Extensible architecture** - Easy to add custom widgets
 - ✅ **Well tested** - 95%+ code coverage
-- ✅ **Lightweight** - Minimal dependencies (`url_launcher` only)
+- ✅ **Lightweight** - Minimal dependencies (`http`, `url_launcher`)
 
 ---
 
@@ -72,7 +81,7 @@ Add the dependency to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  dynamic_ui_renderer: ^0.2.0
+  dynamic_ui_renderer: ^0.3.0
 ```
 
 Then run:
@@ -81,7 +90,7 @@ Then run:
 flutter pub get
 ```
 
-> **Note:** The package automatically includes `url_launcher` for web URL support. No additional setup needed!
+> **Note:** The package includes `http` for network fetching and `url_launcher` for web URL support. No additional setup needed!
 
 ---
 
@@ -417,28 +426,64 @@ Column(
 // Fields will render in order: field2, field3, field1
 ```
 
-### 🌐 Fetch UI from Server
+### 🌐 Network Fetching (v0.3.0)
 
 ```dart
-Future<Widget> fetchUIFromServer(BuildContext context, String formId) async {
-  try {
-    final response = await http.get(
-      Uri.parse('https://api.example.com/forms/$formId')
-    );
+// Simple GET — one line
+DynamicUIRenderer.fromNetwork(
+  'https://api.example.com/ui/dashboard',
+  context,
+);
 
-    if (response.statusCode == 200) {
-      return DynamicUIRenderer.fromJsonString(
-        response.body, 
-        context,
-        formId: formId,
-      );
+// POST with auth header and body
+DynamicUIRenderer.fromNetwork(
+  'https://api.example.com/ui/generate',
+  context,
+  method: HttpMethod.post,
+  headers: {'Authorization': 'Bearer \$token'},
+  body: {'userId': '123', 'theme': 'dark'},
+  loadingWidget: const CircularProgressIndicator(),
+  errorWidget: (error) => Text('Failed: \$error'),
+);
+
+// Full control via NetworkRequest object
+final request = NetworkRequest(
+  url: 'https://api.example.com/ui/profile',
+  method: HttpMethod.get,
+  headers: {'Authorization': 'Bearer \$token'},
+  timeout: const Duration(seconds: 15),
+  maxRetries: 5,
+);
+
+DynamicUIRenderer.fromNetworkWithRequest(request, context);
+```
+
+#### Expected JSON format from your server
+
+Your API endpoint should return the same JSON schema that `fromJsonString` accepts:
+
+```json
+{
+  "type": "column",
+  "properties": { "padding": 16 },
+  "children": [
+    {
+      "type": "text",
+      "properties": { "text": "Loaded from server!", "fontSize": 24 }
     }
-    return Text('Error: ${response.statusCode}');
-  } catch (e) {
-    return Text('Network error: $e');
-  }
+  ]
 }
 ```
+
+#### Exception types
+
+| Exception | When thrown |
+|-----------|-------------|
+| `TimeoutException` | Request exceeded timeout duration |
+| `NoInternetException` | No network connectivity |
+| `HttpException` | Server returned non-2xx status |
+| `InvalidJsonException` | Response body is not valid JSON |
+| `MaxRetriesExceededException` | All retry attempts exhausted |
 
 ---
 
@@ -460,6 +505,10 @@ The example app includes:
   - Registration Form with all field types
   - Contact Form with dropdown and textarea
   - Dynamic Layout Form with toggleable field order
+- 🌐 **Network Loading Demo** - Live interactive demo with 3 real HTTP scenarios
+  - Load UI from GitHub (real GET → spinner → rendered widget)
+  - Simulate Error (real 404 → DefaultErrorWidget + working Retry)
+  - Simulate Timeout (1ms timeout → TimeoutException)
 - ⚠️ **Error Handling Demo** - Graceful fallbacks for unsupported widgets
 
 ---
@@ -467,22 +516,26 @@ The example app includes:
 ## 🏗 Architecture Overview
 
 ```
-JSON → UIComponent (Model) → WidgetFactory → Flutter Widget
-        ↓              ↓
-   Form Models    Properties Parser
-        ↓              ↓
-FormController    Action Handler
-        ↓              ↓
-  Validation      Navigation/Dialogs
+URL ──► NetworkLoader ──► HttpClient ──► (retry + timeout)
+              │
+              ▼
+JSON ──► UIComponent (Model) ──► WidgetFactory ──► Flutter Widget
+                ↓                      ↓
+           Form Models           Properties Parser
+                ↓                      ↓
+          FormController          Action Handler
+                ↓                      ↓
+           Validation           Navigation/Dialogs
 ```
 
 The package follows a clean, modular architecture:
-1. **JSON Parsing** - Converts JSON to type-safe models
-2. **Form Models** - Type-safe field and validation rule definitions
-3. **FormController** - Manages form state, validation, and submissions
-4. **Widget Factory** - Maps component types to Flutter widgets
-5. **Property Parsers** - Safely converts JSON values to Flutter types
-6. **Action Handler** - Executes user interactions
+1. **Network Layer** - Fetches JSON from URLs with retry, timeout, and error handling
+2. **JSON Parsing** - Converts JSON to type-safe models
+3. **Form Models** - Type-safe field and validation rule definitions
+4. **FormController** - Manages form state, validation, and submissions
+5. **Widget Factory** - Maps component types to Flutter widgets
+6. **Property Parsers** - Safely converts JSON values to Flutter types
+7. **Action Handler** - Executes user interactions
 
 ---
 
@@ -506,11 +559,11 @@ genhtml coverage/lcov.info -o coverage/html
 
 | Metric | Value |
 |--------|-------|
-| **Latest Version** | v0.2.0 |
-| **Published** | February 2026 |
+| **Latest Version** | v0.3.0 |
+| **Published** | April 2026 |
 | **License** | MIT |
 | **Platforms** | Android, iOS, Web, macOS, Linux, Windows |
-| **Dependencies** | `url_launcher` (automatically included) |
+| **Dependencies** | `http`, `url_launcher` |
 | **Field Types** | 10+ |
 | **Validation Rules** | 12+ |
 | **Test Coverage** | 95%+ |
@@ -566,13 +619,15 @@ This project is licensed under the MIT License - see the [LICENSE](https://pub.d
 
 ---
 
-## 🔮 Coming Soon (v0.3.0)
+## 🔮 Roadmap
 
-- 🚀 **Network Fetching** - Load UI directly from URLs
-- 💾 **Caching** - Cache UI definitions locally
-- 🧩 **Custom Widget Registry** - Register your own widgets
-- 🎨 **Theme Support** - Dynamic theming from JSON
-- 📦 **Plugin System** - Easy third-party integrations
+| Version | Feature | Status |
+|---------|---------|--------|
+| v0.2.1 | Forms & Validation | ✅ Done |
+| v0.3.0 | Network Fetching | ✅ Done |
+| v0.4.0 | Caching | ⏳ Next |
+| v1.0.0 | Custom Widget Registry | 🎯 Planned |
+| v1.1.0 | Theme Support | 🚀 Planned |
 
 ---
 

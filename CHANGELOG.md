@@ -1,5 +1,56 @@
 # Changelog
 
+## [0.3.0] - 2026-04-26 🌐
+
+### ✨ New Features - Network Fetching
+
+#### Network Loading API
+- **`DynamicUIRenderer.fromNetwork()`** — load UI from a URL with a single call; supports GET/POST/PUT/PATCH/DELETE, custom headers, query params, timeout, and retry
+- **`DynamicUIRenderer.fromNetworkWithRequest()`** — full control via `NetworkRequest` object for reusable request configuration
+- **`DynamicUIRenderer.fromNetworkWithCache()`** — placeholder stub ready for v0.4.0 caching
+
+#### NetworkRequest / NetworkResponse models
+- `NetworkRequest` — typed configuration: `url`, `method`, `headers`, `body`, `queryParams`, `timeout`, `maxRetries`
+- `NetworkResponse` — typed response with `isSuccess`, `hasData` helpers
+- `HttpMethod` enum — `get`, `post`, `put`, `patch`, `delete`
+
+#### HttpClient
+- Retry with exponential backoff (1s, 2s, 4s…)
+- 4xx errors are never retried; 5xx errors retry up to `maxRetries`
+- Accepts injectable `http.Client` for testability
+
+#### Error handling
+- `TimeoutException` — request timed out
+- `NoInternetException` — no connectivity
+- `HttpException` — non-2xx response with status code and body
+- `InvalidJsonException` — response is not valid JSON
+- `MaxRetriesExceededException` — exhausted all retry attempts
+- `UnknownNetworkException` — catch-all for unexpected errors
+
+#### Default UI components
+- `DefaultLoadingWidget` — centered `CircularProgressIndicator` with optional message
+- `DefaultErrorWidget` — error icon, message, and retry button; custom error widget supported
+
+### 🏗️ Architecture
+- All network classes injectable/mockable via `http.Client` constructor param
+- `NetworkLoader` StatefulWidget handles loading/error/success states with `FutureBuilder`
+- URL used as form ID for network-loaded forms to avoid collisions
+
+### ✅ Testing
+- 28 new tests covering `NetworkRequest`, `NetworkResponse`, `NetworkException` subclasses, `HttpMethod`, and `HttpClient`
+- `HttpClient` fully tested using `MockClient` — no real network required
+- Retry logic verified: 4xx no-retry, 5xx retry, success-on-second-attempt
+
+### 📦 Exports
+- All network types exported from the main `dynamic_ui_renderer.dart` barrel
+
+### 📱 Example App
+- New **Network Loading** demo section with 3 live interactive scenarios
+- **Load UI** — real GET request to GitHub raw JSON → spinner → rendered widget
+- **Simulate Error** — real 404 → `DefaultErrorWidget` with working Retry button
+- **Simulate Timeout** — 1ms timeout → `TimeoutException` → error state
+- Exception reference table and one-line usage snippet
+
 ## [0.2.1] - 2024-02-28 📚
 
 ### 📝 Documentation

@@ -1,0 +1,182 @@
+{
+  "type": "column",
+  "properties": { "crossAxisAlignment": "stretch" },
+  "children": [
+    {
+      "type": "container",
+      "properties": { "color": "#0D47A1", "padding": 24 },
+      "children": [
+        {
+          "type": "column",
+          "properties": { "crossAxisAlignment": "start" },
+          "children": [
+            {
+              "type": "text",
+              "properties": {
+                "text": "🌐   FETCHED FROM GITHUB",
+                "color": "#90CAF9",
+                "fontSize": 11,
+                "fontWeight": "w600"
+              }
+            },
+            {
+              "type": "container",
+              "properties": { "height": 12 }
+            },
+            {
+              "type": "text",
+              "properties": {
+                "text": "Server-Driven UI",
+                "color": "#FFFFFF",
+                "fontSize": 28,
+                "fontWeight": "bold"
+              }
+            },
+            {
+              "type": "container",
+              "properties": { "height": 8 }
+            },
+            {
+              "type": "text",
+              "properties": {
+                "text": "This card was built entirely from JSON\nfetched over HTTP at runtime — no app\nupdate needed to change the UI.",
+                "color": "#BBDEFB",
+                "fontSize": 14
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "container",
+      "properties": { "color": "#FFFFFF", "padding": 20 },
+      "children": [
+        {
+          "type": "column",
+          "properties": { "crossAxisAlignment": "stretch" },
+          "children": [
+            {
+              "type": "row",
+              "properties": { "mainAxisAlignment": "spaceEvenly" },
+              "children": [
+                {
+                  "type": "column",
+                  "properties": { "crossAxisAlignment": "center" },
+                  "children": [
+                    {
+                      "type": "text",
+                      "properties": {
+                        "text": "3",
+                        "fontSize": 26,
+                        "fontWeight": "bold",
+                        "color": "#0D47A1"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "properties": {
+                        "text": "States",
+                        "fontSize": 12,
+                        "color": "#9E9E9E"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "column",
+                  "properties": { "crossAxisAlignment": "center" },
+                  "children": [
+                    {
+                      "type": "text",
+                      "properties": {
+                        "text": "Auto",
+                        "fontSize": 26,
+                        "fontWeight": "bold",
+                        "color": "#0D47A1"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "properties": {
+                        "text": "Retry",
+                        "fontSize": 12,
+                        "color": "#9E9E9E"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "column",
+                  "properties": { "crossAxisAlignment": "center" },
+                  "children": [
+                    {
+                      "type": "text",
+                      "properties": {
+                        "text": "5",
+                        "fontSize": 26,
+                        "fontWeight": "bold",
+                        "color": "#0D47A1"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "properties": {
+                        "text": "Exceptions",
+                        "fontSize": 12,
+                        "color": "#9E9E9E"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "column",
+                  "properties": { "crossAxisAlignment": "center" },
+                  "children": [
+                    {
+                      "type": "text",
+                      "properties": {
+                        "text": "v0.3",
+                        "fontSize": 26,
+                        "fontWeight": "bold",
+                        "color": "#0D47A1"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "properties": {
+                        "text": "Version",
+                        "fontSize": 12,
+                        "color": "#9E9E9E"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "container",
+              "properties": { "height": 20 }
+            },
+            {
+              "type": "button",
+              "properties": {
+                "text": "⭐   Star on GitHub",
+                "backgroundColor": "#0D47A1",
+                "foregroundColor": "#FFFFFF",
+                "borderRadius": 10
+              },
+              "actions": {
+                "type": "launchUrl",
+                "parameters": {
+                  "url": "https://github.com/Jashwanth-Gowda-R/dynamic_ui_renderer",
+                  "mode": "external"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

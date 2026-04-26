@@ -41,6 +41,10 @@ class _HomePageState extends State<HomePage> {
   Map<String, dynamic>? _layoutFormData;
   bool _useAlternateOrder = false;
 
+  // Network demo state
+  String? _networkDemoScenario;
+  int _networkDemoKey = 0;
+
   final List<DemoSection> _sections = [
     DemoSection(
       title: '🎯 Button Actions',
@@ -66,6 +70,11 @@ class _HomePageState extends State<HomePage> {
       title: '📝 Multi-Form Demo',
       description: 'Multiple forms with real-time data display',
       isMultiForm: true,
+    ),
+    DemoSection(
+      title: '🌐 Network Loading',
+      description: 'Load UI dynamically from a URL (v0.3.0)',
+      isNetworkDemo: true,
     ),
     DemoSection(
       title: '⚠️ Error Handling',
@@ -111,7 +120,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dynamic UI Renderer v0.2.0'),
+        title: const Text('Dynamic UI Renderer v0.3.0'),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         elevation: 2,
@@ -274,7 +283,7 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(width: 12),
           const Expanded(
             child: Text(
-              'All features working in v0.2.0',
+              'All features working in v0.3.0',
               style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
             ),
           ),
@@ -327,6 +336,8 @@ class _HomePageState extends State<HomePage> {
   Widget _buildSectionContent(BuildContext context) {
     if (_sections[_selectedIndex].isMultiForm) {
       return _buildMultiFormContent(context);
+    } else if (_sections[_selectedIndex].isNetworkDemo) {
+      return _buildNetworkDemoContent(context);
     } else {
       return Container(
         width: double.infinity,
@@ -342,6 +353,424 @@ class _HomePageState extends State<HomePage> {
         ),
       );
     }
+  }
+
+  static const _rawJsonUrl =
+      'https://raw.githubusercontent.com/Jashwanth-Gowda-R/dynamic_ui_renderer/master/example/assets/network_demo.json';
+  static const _badUrl =
+      'https://raw.githubusercontent.com/Jashwanth-Gowda-R/dynamic_ui_renderer/master/example/assets/notfound.json';
+
+  Widget _buildNetworkDemoContent(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildNetworkHeader(),
+        const SizedBox(height: 20),
+        _buildScenarioButtons(),
+        const SizedBox(height: 14),
+        _buildLiveResultPanel(context),
+        const SizedBox(height: 24),
+        _buildNetworkCodeSnippet(),
+        const SizedBox(height: 16),
+        _buildExceptionTable(),
+      ],
+    );
+  }
+
+  Widget _buildNetworkHeader() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.indigo.shade800, Colors.blue.shade500],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.cloud_download_rounded,
+              color: Colors.white,
+              size: 28,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Live Network Demo',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Real HTTP requests to GitHub. Pick a scenario to see all 3 states in action.',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.85),
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildScenarioButtons() {
+    return Row(
+      children: [
+        _scenarioButton(
+          label: 'Load UI',
+          icon: Icons.cloud_done_outlined,
+          color: Colors.green,
+          scenario: 'success',
+        ),
+        const SizedBox(width: 10),
+        _scenarioButton(
+          label: 'Simulate\nError',
+          icon: Icons.error_outline_rounded,
+          color: Colors.red,
+          scenario: 'error',
+        ),
+        const SizedBox(width: 10),
+        _scenarioButton(
+          label: 'Simulate\nTimeout',
+          icon: Icons.timer_off_outlined,
+          color: Colors.orange,
+          scenario: 'timeout',
+        ),
+      ],
+    );
+  }
+
+  Widget _scenarioButton({
+    required String label,
+    required IconData icon,
+    required MaterialColor color,
+    required String scenario,
+  }) {
+    final isActive = _networkDemoScenario == scenario;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() {
+          _networkDemoScenario = scenario;
+          _networkDemoKey++;
+        }),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          decoration: BoxDecoration(
+            color: isActive ? color : color.shade50,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isActive ? color.shade700 : color.shade200,
+              width: isActive ? 2 : 1,
+            ),
+            boxShadow: isActive
+                ? [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ]
+                : [],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                color: isActive ? Colors.white : color.shade600,
+                size: 22,
+              ),
+              const SizedBox(height: 6),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: isActive ? Colors.white : color.shade700,
+                  height: 1.3,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLiveResultPanel(BuildContext context) {
+    NetworkRequest? request;
+    if (_networkDemoScenario == 'success') {
+      request = const NetworkRequest(url: _rawJsonUrl, maxRetries: 1);
+    } else if (_networkDemoScenario == 'error') {
+      request = const NetworkRequest(url: _badUrl, maxRetries: 1);
+    } else if (_networkDemoScenario == 'timeout') {
+      request = NetworkRequest(
+        url: _rawJsonUrl,
+        timeout: const Duration(milliseconds: 1),
+        maxRetries: 1,
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Text(
+              'LIVE RESULT',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.2,
+                color: Colors.black45,
+              ),
+            ),
+            if (_networkDemoScenario != null) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: _scenarioColor().shade100,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  _scenarioLabel(),
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: _scenarioColor().shade800,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        const SizedBox(height: 8),
+        Container(
+          constraints: const BoxConstraints(minHeight: 260),
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          clipBehavior: Clip.hardEdge,
+          child: request == null
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.touch_app_rounded,
+                          size: 44,
+                          color: Colors.grey.shade300,
+                        ),
+                        const SizedBox(height: 14),
+                        Text(
+                          'Tap a scenario above',
+                          style: TextStyle(
+                            color: Colors.grey.shade500,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'A real HTTP request fires and you\'ll see\nloading → success / error states live.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.grey.shade400,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : NetworkLoader(
+                  key: ValueKey(_networkDemoKey),
+                  request: request,
+                ),
+        ),
+      ],
+    );
+  }
+
+  MaterialColor _scenarioColor() {
+    switch (_networkDemoScenario) {
+      case 'success':
+        return Colors.green;
+      case 'error':
+        return Colors.red;
+      case 'timeout':
+        return Colors.orange;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String _scenarioLabel() {
+    switch (_networkDemoScenario) {
+      case 'success':
+        return '✅  Load UI';
+      case 'error':
+        return '❌  Simulate Error';
+      case 'timeout':
+        return '⏱  Simulate Timeout';
+      default:
+        return '';
+    }
+  }
+
+  Widget _buildNetworkCodeSnippet() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'USAGE',
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.2,
+            color: Colors.black45,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E1E1E),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const Text(
+            '// One line to load UI from a URL\n'
+            "DynamicUIRenderer.fromNetwork(\n"
+            "  'https://api.example.com/ui/home',\n"
+            '  context,\n'
+            ');',
+            style: TextStyle(
+              fontFamily: 'monospace',
+              color: Colors.white70,
+              fontSize: 13,
+              height: 1.7,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildExceptionTable() {
+    final rows = [
+      (Colors.blue, 'TimeoutException', 'Request exceeded the timeout duration'),
+      (Colors.red, 'NoInternetException', 'No network connectivity detected'),
+      (Colors.orange, 'HttpException', 'Server returned a non-2xx status code'),
+      (Colors.purple, 'InvalidJsonException', 'Response body is not valid JSON'),
+      (Colors.teal, 'MaxRetriesExceededException', 'All retry attempts exhausted'),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'TYPED EXCEPTIONS',
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.2,
+            color: Colors.black45,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          child: Column(
+            children: rows.asMap().entries.map((entry) {
+              final i = entry.key;
+              final (color, name, desc) = entry.value;
+              final isFirst = i == 0;
+              final isLast = i == rows.length - 1;
+              return Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 11,
+                ),
+                decoration: BoxDecoration(
+                  color: i.isEven ? Colors.white : Colors.grey.shade50,
+                  borderRadius: BorderRadius.vertical(
+                    top: isFirst ? const Radius.circular(12) : Radius.zero,
+                    bottom: isLast ? const Radius.circular(12) : Radius.zero,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 5,
+                      child: Text(
+                        name,
+                        style: TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: color,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      flex: 6,
+                      child: Text(
+                        desc,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildFeatureStatus() {
@@ -2298,11 +2727,13 @@ class DemoSection {
   final String description;
   final String? json;
   final bool isMultiForm;
+  final bool isNetworkDemo;
 
   DemoSection({
     required this.title,
     required this.description,
     this.json,
     this.isMultiForm = false,
+    this.isNetworkDemo = false,
   });
 }
